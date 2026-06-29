@@ -64,12 +64,12 @@ def build_excel(result_df: pd.DataFrame) -> bytes:
     doi_col_idx = columns.index("DOI") + 1
     grade_col_idx = columns.index("우선순위") + 1
 
-    for row_idx, row_data in enumerate(result_df.itertuples(index=False), start=2):
-        grade = row_data._asdict()["우선순위"]
+    for row_idx, (_, row_data) in enumerate(result_df.iterrows(), start=2):
+        grade = row_data["우선순위"]
         row_fill = GRADE_FILLS.get(grade, GRADE_FILLS["📄"])
 
         for col_idx, col_name in enumerate(columns, start=1):
-            value = row_data._asdict()[col_name]
+            value = row_data[col_name]
             cell = ws.cell(row=row_idx, column=col_idx)
             cell.border = THIN_BORDER
             cell.alignment = Alignment(vertical="center", wrap_text=(col_name == "Title"))

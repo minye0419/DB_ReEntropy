@@ -7,11 +7,21 @@ def _contains_keyword(text: str, keywords: list[str]) -> bool:
     return any(kw.lower() in text_lower for kw in keywords)
 
 
+def _get_field(row: pd.Series, *candidates: str) -> str:
+    for key in candidates:
+        val = row.get(key)
+        if val and str(val).strip() and str(val).strip().lower() != "nan":
+            return str(val)
+    return ""
+
+
 def _build_search_text(row: pd.Series) -> str:
+    # Zotero CSV uses "Abstract Note", "Manual Tags", "Automatic Tags"
+    # WoS direct CSV uses "Abstract", "Author Keywords", "Keywords Plus"
     parts = [
-        str(row.get("Abstract", "") or ""),
-        str(row.get("Author Keywords", "") or ""),
-        str(row.get("Keywords Plus", "") or ""),
+        _get_field(row, "Abstract Note", "Abstract"),
+        _get_field(row, "Manual Tags", "Author Keywords"),
+        _get_field(row, "Automatic Tags", "Keywords Plus"),
     ]
     return " ".join(parts)
 
