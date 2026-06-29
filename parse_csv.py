@@ -38,7 +38,8 @@ def _priority_grade(tensile: bool, process: bool, cryo: bool) -> str:
 
 def _format_author_year(row: pd.Series) -> str:
     author = str(row.get("Author", "") or "").strip()
-    year = str(row.get("Publication Year", "") or "").strip()
+    raw_year = str(row.get("Publication Year", "") or "").strip()
+    year = str(int(float(raw_year))) if raw_year.replace(".", "", 1).isdigit() else raw_year
 
     if author:
         first_author = author.split(";")[0].strip()
@@ -83,7 +84,11 @@ def analyze(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def load_and_analyze(file) -> tuple[pd.DataFrame, dict]:
-    df = pd.read_csv(file, encoding="utf-8-sig")
+    try:
+        df = pd.read_csv(file, encoding="utf-8-sig")
+    except UnicodeDecodeError:
+        file.seek(0)
+        df = pd.read_csv(file, encoding="cp949")
     result_df = analyze(df)
 
     total = len(result_df)

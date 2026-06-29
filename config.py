@@ -1,8 +1,8 @@
 TENSILE_KEYWORDS = [
-    "UTS", "YS", "TE",
     "tensile strength", "yield strength", "elongation",
-    "ultimate tensile", "fracture", "tensile properties",
+    "ultimate tensile", "tensile properties",
     "mechanical properties", "tensile behavior",
+    "UTS", "YS",
 ]
 
 PROCESS_KEYWORDS = [
