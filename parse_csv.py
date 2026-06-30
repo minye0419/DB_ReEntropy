@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import pandas as pd
 from config import TENSILE_KEYWORDS, PROCESS_KEYWORDS, CRYO_KEYWORDS
 
@@ -72,7 +74,7 @@ def analyze(df: pd.DataFrame) -> pd.DataFrame:
                 "Document Type": str(row.get("Item Type", "") or "").strip(),
                 "인장물성": "✅" if tensile else "❌",
                 "공정변수": "✅" if process else "❌",
-                "77K": "⭐" if cryo else "❌",
+                "77K": "✅" if cryo else "❌",
                 "우선순위": grade,
                 "_sort_key": PRIORITY_ORDER[grade],
             }
@@ -84,11 +86,18 @@ def analyze(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def load_and_analyze(file) -> tuple[pd.DataFrame, dict]:
-    try:
-        df = pd.read_csv(file, encoding="utf-8-sig")
-    except UnicodeDecodeError:
-        file.seek(0)
-        df = pd.read_csv(file, encoding="cp949")
+    df = None
+    for encoding in ("utf-8-sig", "cp949", "utf-8", "latin-1"):
+        try:
+            file.seek(0)
+            df = pd.read_csv(file, encoding=encoding)
+            break
+        except (UnicodeDecodeError, Exception):
+            continue
+
+    if df is None:
+        raise ValueError("CSV 파일 인코딩을 인식할 수 없습니다. UTF-8 또는 CP949 형식으로 저장 후 다시 시도하세요.")
+
     result_df = analyze(df)
 
     total = len(result_df)
